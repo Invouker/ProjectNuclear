@@ -1,0 +1,11 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "minecraft:item/template_skull",
+    "model": {
+      "type": "projectnuclear:generic_overlay",
+      "item_name": "coal_generator",
+      "texture": "projectnuclear:block/machine_casing"
+    }
+  }
+}

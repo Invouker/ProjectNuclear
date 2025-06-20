@@ -1,5 +1,5 @@
 {
-  "itemGroup.projectnuclear": "Example Mod Tab",
-  "block.projectnuclear.example_block": "Example Block",
-  "item.projectnuclear.example_item": "Example Item"
+	"itemGroup.project_nuclear": "Project Nuclear",
+	"block.projectnuclear.coal_generator":"Coal Generator",
+	"container.project_nuclear.coal_generator": "Coal Generator"
 }
