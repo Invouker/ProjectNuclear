@@ -38,7 +38,7 @@ public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOve
 
     private int burnTime = 0;       // Koľko tickov ešte horí palivo
     private int maxBurnTime = 0;
-    private final int energyPerTick = 20; // Koľko energie vyrobí za jeden tick
+    private final int energyPerTick = 100; // Koľko energie vyrobí za jeden tick
 
     private MachineRenderer machineRenderer;
 
