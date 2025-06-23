@@ -22,7 +22,7 @@ public class CoalGeneratorMenu extends AbstractContainerMenu {
 
     @OnlyIn(Dist.CLIENT)
     public CoalGeneratorMenu(int id, Inventory inv, FriendlyByteBuf extraData) {
-        this(id, inv, inv.player.level().getBlockEntity(extraData.readBlockPos()), new SimpleContainerData(2));
+        this(id, inv, inv.player.level().getBlockEntity(extraData.readBlockPos()), new SimpleContainerData(3));
     }
 
     public CoalGeneratorMenu(int id, Inventory inventory, BlockEntity entity, ContainerData containerData) {
@@ -37,21 +37,6 @@ public class CoalGeneratorMenu extends AbstractContainerMenu {
 
         addDataSlots(containerData);
     }
-/*
-    public CoalGeneratorMenu(int id, Inventory playerInventory, CoalGeneratorTile blockEntity) {
-        super(ModMenuTypes.COAL_GENERATOR_MENU.get(), id);
-        assert blockEntity.getLevel() != null;
-        //this.containerLevelAccess = ContainerLevelAccess.create(blockEntity.getLevel(), blockEntity.getBlockPos());
-        this.blockEntity = blockEntity;
-
-        addPlayerInventory(playerInventory);
-
-        this.addSlot(new SlotBurnable(blockEntity.getLevel(), blockEntity.getItemHandler(), 0,25, 33));
-        /*Optional<IItemHandler> handler = blockEntity.getCapability(Capabilities.ItemHandler.ITEM, null);
-        this.addSlot(new SlotBurnable(handler.orElseThrow(() -> new IllegalStateException("Item handler capability not found!"))
-                , 0,25, 33));*
-    }*/
-
 
     private void addPlayerInventory(Inventory playerInventory) {
         for (int row = 0; row < 3; ++row) {

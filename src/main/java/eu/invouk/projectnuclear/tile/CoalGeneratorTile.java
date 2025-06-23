@@ -37,13 +37,14 @@ import java.util.Optional;
 public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOverlayRenderable {
 
     private int burnTime = 0;       // Koľko tickov ešte horí palivo
+    private int maxBurnTime = 0;
     private final int energyPerTick = 20; // Koľko energie vyrobí za jeden tick
 
     private MachineRenderer machineRenderer;
 
     private boolean active;
 
-    private final SimpleContainerData containerData = new SimpleContainerData(2);
+    private final SimpleContainerData containerData = new SimpleContainerData(3);
     private final EnergyStorage energyStorage = new EnergyStorage(1000000, 128);
     private final BurnableItemStackHandler itemHandler = new BurnableItemStackHandler(1) {
         @Override
@@ -68,6 +69,8 @@ public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOve
             int energyAdded = blockEntity.energyStorage.receiveEnergy(blockEntity.energyPerTick, false);
             if(energyAdded > 0)
                 dirty = true;
+
+            blockEntity.setActive(true);
         }
         if(blockEntity.burnTime <= 0) {
             ItemStack fuelStack = blockEntity.itemHandler.getStackInSlot(0);
@@ -75,11 +78,11 @@ public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOve
 
             if(burnTime > 0) {
                 blockEntity.burnTime = burnTime;
-                //blockEntity.maxBurnTime = burnTime;
+                blockEntity.maxBurnTime = burnTime;
 
                 fuelStack.shrink(1);
                 dirty = true;
-            }
+            } else  blockEntity.setActive(false);
         }
         if(dirty) {
             blockEntity.setChanged();
@@ -89,6 +92,7 @@ public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOve
 
         blockEntity.getDataAccess().set(0, blockEntity.energyStorage.getEnergyStored());
         blockEntity.getDataAccess().set(1, blockEntity.energyStorage.getMaxEnergyStored());
+        blockEntity.getDataAccess().set(2, blockEntity.getProgressOfBurn());
     }
 
     private final ContainerData dataAccess = new ContainerData() {
@@ -97,6 +101,7 @@ public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOve
             return switch (index) {
                 case 0 -> energyStorage.getEnergyStored();
                 case 1 -> energyStorage.getMaxEnergyStored();
+                case 2 -> getProgressOfBurn();
                 default -> -1;
             };
         }
@@ -108,9 +113,13 @@ public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOve
 
         @Override
         public int getCount() {
-            return 2;
+            return 3;
         }
     };
+
+    public int getProgressOfBurn() {
+        return  (int) ((burnTime / (float) maxBurnTime) * 100);
+    }
 
     public ContainerData getDataAccess() {
         return containerData;
@@ -160,32 +169,6 @@ public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOve
             }
         }
     }
-/*
-    @Override
-    public ResourceLocation getOverlayTexture(Direction side) {
-        BlockState state = getBlockState();
-        Direction facing = state.getValue(CoalGenerator.FACING);
-
-        if (side == facing) {
-            return active
-                    ? ResourceLocation.tryBuild(Projectnuclear.MODID, "block/machine_overlay_front_active")
-                    : ResourceLocation.tryBuild(Projectnuclear.MODID, "block/machine_overlay_front_inactive");
-        } else {
-            switch (side) {
-                case UP: return
-                        ResourceLocation.tryBuild(Projectnuclear.MODID, "block/machine_overlay_top");
-                case DOWN: return
-                        ResourceLocation.tryBuild(Projectnuclear.MODID, "block/machine_overlay_bottom");
-                case SOUTH:
-                case EAST:
-                case WEST:
-                case NORTH: return
-                        ResourceLocation.tryBuild(Projectnuclear.MODID, "block/machine_overlay_other");
-
-            }
-        }
-        return null;
-    }*/
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
