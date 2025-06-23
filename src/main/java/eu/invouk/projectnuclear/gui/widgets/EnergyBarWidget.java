@@ -16,15 +16,15 @@ public class EnergyBarWidget extends AbstractWidget {
 
     private static final ResourceLocation ENERGY_BAR_TEXTURE = ResourceLocation.fromNamespaceAndPath(Projectnuclear.MODID, "textures/gui/widgets/energy_bar.png");
 
-    private static final int BG_TEX_X = 0;
-    private static final int BG_TEX_Y = 0;
+    private static final int BG_TEXTURE_X = 0;
+    private static final int BG_TEXTURE_Y = 0;
     private static final int BG_WIDTH = 20;
-    private static final int BG_HEIGHT = 42;
+    private static final int BG_HEIGHT = 50;
 
-    private static final int EB_TEX_X = 40;
-    private static final int EB_TEX_Y = 0;
-    private static final int EB_WIDTH = 16;
-    private static final int EB_HEIGHT = 38;
+    private static final int EB_TEXTURE_X = 20;
+    private static final int EB_TEXTURE_Y = 2;
+    private static final int EB_WIDTH = 32;
+    private static final int EB_HEIGHT = 45;
 
     private int energy;
     private int maxEnergy;
@@ -44,18 +44,18 @@ public class EnergyBarWidget extends AbstractWidget {
 
     @Override
     public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        guiGraphics.blit(RenderType::guiTexturedOverlay, ENERGY_BAR_TEXTURE, this.getX(), this.getY(), BG_TEX_X, BG_TEX_Y, BG_WIDTH, BG_HEIGHT, 128, 128);
+        guiGraphics.blit(RenderType::guiTexturedOverlay, ENERGY_BAR_TEXTURE, this.getX(), this.getY(), BG_TEXTURE_X, BG_TEXTURE_Y, BG_WIDTH, BG_HEIGHT, 55, 50);
 
         energy = Math.max(0, iEnergyProvider.getEnergy());
         maxEnergy = Math.max(0, iEnergyProvider.getMaxEnergy());
 
         float energyPercent = Math.min(Math.max((float) energy / maxEnergy, 0f), 1f);
         int filledHeight = (int) (EB_HEIGHT * energyPercent);
-        int fillY = this.getY() + BG_HEIGHT - filledHeight;
         int fillX = this.getX() + (BG_WIDTH - EB_WIDTH) / 2;
+        int fillY = this.getY() + BG_HEIGHT - filledHeight;
 
         if (filledHeight >= 0) {
-            guiGraphics.blit(RenderType::guiTexturedOverlay, ENERGY_BAR_TEXTURE, fillX, fillY -1, EB_TEX_X, EB_TEX_Y + (EB_HEIGHT - filledHeight), EB_WIDTH+1, filledHeight, 128, 128);
+            guiGraphics.blit(RenderType::guiTexturedOverlay, ENERGY_BAR_TEXTURE, fillX+8, fillY -2, EB_TEXTURE_X, EB_TEXTURE_Y + (EB_HEIGHT - filledHeight), EB_WIDTH, filledHeight, 53, 50);
         }
 
         if (this.isMouseOver(mouseX, mouseY)) {

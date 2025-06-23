@@ -4,6 +4,7 @@ import eu.invouk.projectnuclear.gui.menu.CoalGeneratorMenu;
 import eu.invouk.projectnuclear.gui.widgets.EnergyBarWidget;
 import eu.invouk.projectnuclear.gui.widgets.IEnergyProvider;
 import eu.invouk.projectnuclear.gui.widgets.ProgressBarWidget;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.api.distmarker.Dist;
@@ -35,5 +36,12 @@ public class CoalGeneratorScreen extends GenericContainerScreen<CoalGeneratorMen
 
          registerWidget(progressBarWidget);
          registerWidget(energyBarWidget);
+    }
+
+    @Override
+    protected void renderBg(GuiGraphics guiGraphics, float v, int i, int i1) {
+        super.renderBg(guiGraphics, v, i, i1);
+
+
     }
 }
