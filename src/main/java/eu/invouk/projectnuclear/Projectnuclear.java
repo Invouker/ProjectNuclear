@@ -3,6 +3,7 @@ package eu.invouk.projectnuclear;
 import com.mojang.logging.LogUtils;
 import eu.invouk.projectnuclear.gui.screen.CoalGeneratorScreen;
 import eu.invouk.projectnuclear.models.GenericOverlayItemRenderer;
+import eu.invouk.projectnuclear.models.GenericOverlayRenderer;
 import eu.invouk.projectnuclear.register.*;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.resources.ResourceLocation;
@@ -16,7 +17,6 @@ import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterSpecialBlockModelRendererEvent;
 import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
 import org.slf4j.Logger;
-import eu.invouk.projectnuclear.models.GenericOverlayRenderer;
 
 @Mod(Projectnuclear.MODID)
 public class Projectnuclear {

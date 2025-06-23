@@ -6,7 +6,6 @@ import eu.invouk.projectnuclear.gui.widgets.IEnergyProvider;
 import eu.invouk.projectnuclear.gui.widgets.ProgressBarWidget;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.Slot;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
@@ -36,7 +35,5 @@ public class CoalGeneratorScreen extends GenericContainerScreen<CoalGeneratorMen
 
          registerWidget(progressBarWidget);
          registerWidget(energyBarWidget);
-
-
     }
 }
