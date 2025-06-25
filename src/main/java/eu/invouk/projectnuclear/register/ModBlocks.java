@@ -2,6 +2,8 @@ package eu.invouk.projectnuclear.register;
 
 import eu.invouk.projectnuclear.Projectnuclear;
 import eu.invouk.projectnuclear.blocks.CoalGenerator;
+import eu.invouk.projectnuclear.blocks.energy.BasicBatteryBuffer;
+import eu.invouk.projectnuclear.blocks.energy.BasicCable;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -16,6 +18,8 @@ public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Projectnuclear.MODID);
 
     public static final DeferredBlock<Block> COAL_GENERATOR = registerBlock("coal_generator", CoalGenerator::new);
+    public static final DeferredBlock<Block> BASIC_CABLE = registerBlock("basic_cable", BasicCable::new);
+    public static final DeferredBlock<Block> BASIC_BATTERY_BUFFER = registerBlock("basic_battery_buffer", BasicBatteryBuffer::new);
 
     private static DeferredBlock<Block> registerBlock(String name, Block block) {
         return registerBlock(name, (properties -> block));

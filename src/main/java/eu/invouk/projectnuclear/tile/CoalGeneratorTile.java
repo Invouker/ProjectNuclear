@@ -2,6 +2,8 @@ package eu.invouk.projectnuclear.tile;
 
 import eu.invouk.projectnuclear.Projectnuclear;
 import eu.invouk.projectnuclear.blocks.CoalGenerator;
+import eu.invouk.projectnuclear.energynet.EnergyNet;
+import eu.invouk.projectnuclear.energynet.IEnergyProducer;
 import eu.invouk.projectnuclear.gui.menu.CoalGeneratorMenu;
 import eu.invouk.projectnuclear.models.IOverlayRenderable;
 import eu.invouk.projectnuclear.models.MachineRenderer;
@@ -34,7 +36,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOverlayRenderable {
+public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOverlayRenderable, IEnergyProducer {
+
+    private EnergyNet net;
+    private int storedEnergy = 0;
+    private final int maxEnergy = 10000;
+    private final int productionRate = 10;
+    private final int voltage = 32; // LV
+    private final int maxOutputPerTick = 32;
 
     private int burnTime = 0;       // Koľko tickov ešte horí palivo
     private int maxBurnTime = 0;
@@ -64,13 +73,21 @@ public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOve
 
         boolean dirty = false;
 
+        if(blockEntity.getEnergyStorage().getEnergyStored() >= blockEntity.getEnergyStorage().getMaxEnergyStored()) {
+            blockEntity.burnTime = 0;
+            blockEntity.maxBurnTime = 0;
+            return;
+        }
+
         if(blockEntity.burnTime > 0) {
             blockEntity.burnTime--;
             int energyAdded = blockEntity.energyStorage.receiveEnergy(blockEntity.energyPerTick, false);
             if(energyAdded > 0)
                 dirty = true;
 
-            blockEntity.setActive(true);
+            if(blockEntity.net != null)
+                blockEntity.net.addProducer(blockEntity);
+            //st.setActive(true);
         }
         if(blockEntity.burnTime <= 0) {
             ItemStack fuelStack = blockEntity.itemHandler.getStackInSlot(0);
@@ -208,5 +225,42 @@ public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOve
     public void writeClientSideData(AbstractContainerMenu menu, RegistryFriendlyByteBuf buffer) {
         buffer.writeBlockPos(this.worldPosition);
         MenuProvider.super.writeClientSideData(menu, buffer);
+    }
+
+    @Override
+    public int produceEnergy() {
+        return 10;
+    }
+
+    @Override
+    public int getVoltage() {
+        return 0;
+    }
+
+    @Override
+    public EnergyNet getEnergyNet() {
+        return net;
+    }
+
+    @Override
+    public void setEnergyNet(EnergyNet net) {
+        this.net = net;
+    }
+
+    @Override
+    public String getDebugInfo() {
+        return String.format(
+                "%s [pos=%s, voltage=%dV, produceEnergy=%dV, netValid=%s]",
+                getClass().getSimpleName(),
+                getBlockPos(),
+                getVoltage(),
+                produceEnergy(),
+                getEnergyNet() != null && getEnergyNet().isValid()
+        );
+    }
+
+    @Override
+    public void explode() {
+
     }
 }

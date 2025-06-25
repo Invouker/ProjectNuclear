@@ -1,6 +1,8 @@
 package eu.invouk.projectnuclear.register;
 
 import eu.invouk.projectnuclear.Projectnuclear;
+import eu.invouk.projectnuclear.tile.BasicBatteryBufferTile;
+import eu.invouk.projectnuclear.tile.BasicCableTile;
 import eu.invouk.projectnuclear.tile.CoalGeneratorTile;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -18,6 +20,18 @@ public class ModBlocksEntities {
                     () -> new BlockEntityType<>(CoalGeneratorTile::new,
                             false,
                     ModBlocks.COAL_GENERATOR.get()));
+
+    public static final Supplier<BlockEntityType<BasicCableTile>> BASIC_CABLE_TILE =
+            BLOCK_ENTITIES.register("basic_cable_tile",
+                    () -> new BlockEntityType<>(BasicCableTile::new,
+                            false,
+                    ModBlocks.BASIC_CABLE.get()));
+
+    public static final Supplier<BlockEntityType<BasicBatteryBufferTile>> BASIC_BATTERY_BUFFER =
+            BLOCK_ENTITIES.register("basic_battery_buffer",
+                    () -> new BlockEntityType<>(BasicBatteryBufferTile::new,
+                            false,
+                    ModBlocks.BASIC_BATTERY_BUFFER.get()));
 
 
 
