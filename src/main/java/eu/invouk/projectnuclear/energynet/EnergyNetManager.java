@@ -1,74 +1,111 @@
 package eu.invouk.projectnuclear.energynet;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class EnergyNetManager {
 
     private static final Set<EnergyNet> allNets = Collections.synchronizedSet(new HashSet<>());
 
     public static void register(IEnergyNode node) {
-        // Hľadaj pripojené siete
-        Set<EnergyNet> neighborNets = new HashSet<>();
-        Level level = ((BlockEntity) node).getLevel();
-        BlockPos pos = ((BlockEntity) node).getBlockPos();
-
-        for (BlockPos offset : BlockPos.betweenClosed(pos.offset(-1, -1, -1), pos.offset(1, 1, 1))) {
-            if (offset.equals(pos)) continue;
-
-            BlockEntity neighbor = level.getBlockEntity(offset);
-            if (neighbor instanceof IEnergyNode neighborNode) {
-                EnergyNet net = neighborNode.getEnergyNet();
-                if (net != null && net.isValid()) {
-                    neighborNets.add(net);
-                }
-            }
-        }
-
-        EnergyNet use;
-        if (neighborNets.isEmpty()) {
-            use = new EnergyNet();
-            allNets.add(use);
-        } else {
-            // Zober prvú sieť a prípadné ďalšie pripoj
-            use = neighborNets.iterator().next();
-            for (EnergyNet other : neighborNets) {
-                if (other != use) {
-                    use.merge(other);
-                    allNets.remove(other);
-                }
-            }
-        }
-
-        if (node instanceof IEnergyProducer p) use.addProducer(p);
-        if (node instanceof IEnergyConsumer c) use.addConsumer(c);
-        if (node instanceof IEnergyCable cable) use.addCable(cable);
-
-        node.setEnergyNet(use);
+        rebuildEnergyNetFrom(node);
     }
 
     public static void unregister(IEnergyNode node) {
         EnergyNet net = node.getEnergyNet();
         if (net != null) {
             net.removeNode(node);
-            if (net.getAllNodes().isEmpty()) {
-                net.setValid(false);
-                allNets.remove(net);
+            net.setValid(false);
+            allNets.remove(net);
+        }
+        node.setEnergyNet(null);
+
+        // Rekonštrukcia sietí okolo zničeného alebo odstráneného node
+        Level level = ((BlockEntity) node).getLevel();
+        BlockPos pos = ((BlockEntity) node).getBlockPos();
+
+        for (Direction dir : Direction.values()) {
+            BlockPos neighborPos = pos.relative(dir);
+            BlockEntity neighbor = level.getBlockEntity(neighborPos);
+
+            if (neighbor instanceof IEnergyNode energyNode) {
+                if (energyNode.getEnergyNet() == null || !energyNode.getEnergyNet().isValid()) {
+                    rebuildEnergyNetFrom(energyNode);
+                }
             }
         }
     }
 
+    public static void rebuildEnergyNetFrom(IEnergyNode start) {
+        BlockEntity startBe = (BlockEntity) start;
+        Level level = startBe.getLevel();
+        if (level == null || level.isClientSide()) return;
+
+        // BFS na nájdenie všetkých susediacich node-ov z aktuálnej pozície
+        Set<IEnergyNode> visited = new HashSet<>();
+        Queue<IEnergyNode> queue = new LinkedList<>();
+        queue.add(start);
+
+        while (!queue.isEmpty()) {
+            IEnergyNode current = queue.poll();
+            if (!visited.add(current)) continue;
+
+            BlockEntity currentBe = (BlockEntity) current;
+            BlockPos currentPos = currentBe.getBlockPos();
+
+            for (Direction dir : Direction.values()) {
+                BlockEntity neighbor = level.getBlockEntity(currentPos.relative(dir));
+                if (neighbor instanceof IEnergyNode neighborNode) {
+                    if (!visited.contains(neighborNode)) {
+                        queue.add(neighborNode);
+                    }
+                }
+            }
+        }
+
+        if (visited.isEmpty()) return;
+
+        // Pred vytvorením novej siete odpoji všetky staré siete týchto node-ov
+        for (IEnergyNode node : visited) {
+            EnergyNet oldNet = node.getEnergyNet();
+            if (oldNet != null) {
+                oldNet.removeNode(node);
+                if (oldNet.getAllNodes().isEmpty()) {
+                    oldNet.setValid(false);
+                    allNets.remove(oldNet);
+                }
+            }
+            node.setEnergyNet(null);
+        }
+
+        // Vytvor novú sieť a pridaj všetky node-y
+        EnergyNet newNet = new EnergyNet();
+        for (IEnergyNode node : visited) {
+            node.setEnergyNet(newNet);
+
+            if (node instanceof IEnergyProducer p) newNet.addProducer(p);
+            if (node instanceof IEnergyConsumer c) newNet.addConsumer(c);
+            if (node instanceof IEnergyCable cable) newNet.addCable(cable);
+        }
+        newNet.setValid(true);
+        allNets.add(newNet);
+    }
+
     public static void tick(Level level) {
-        // Zavolaj raz za tick — len na server strane
         if (level.isClientSide) return;
 
-        for (EnergyNet net : allNets) {
-            if (net.isValid()) {
+        synchronized (allNets) {
+            Iterator<EnergyNet> it = allNets.iterator();
+            while (it.hasNext()) {
+                EnergyNet net = it.next();
+                if (!net.isValid()) {
+                    it.remove();
+                    continue;
+                }
                 net.tick();
             }
         }
