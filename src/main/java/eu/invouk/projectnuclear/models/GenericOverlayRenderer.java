@@ -125,14 +125,14 @@ public class GenericOverlayRenderer<T extends BlockEntity & IOverlayRenderable> 
                          float nx, float ny, float nz,
                          int packedLight, int packedOverlay) {
 
-        putVertex(buffer, pose, x0, y0, z0, u0, v0, nx, ny, nz, packedLight, packedOverlay);
-        putVertex(buffer, pose, x1, y1, z1, u0, v1, nx, ny, nz, packedLight, packedOverlay);
-        putVertex(buffer, pose, x2, y2, z2, u1, v1, nx, ny, nz, packedLight, packedOverlay);
-        putVertex(buffer, pose, x3, y3, z3, u1, v0, nx, ny, nz, packedLight, packedOverlay);
+        putaddVertex(buffer, pose, x0, y0, z0, u0, v0, nx, ny, nz, packedLight, packedOverlay);
+        putaddVertex(buffer, pose, x1, y1, z1, u0, v1, nx, ny, nz, packedLight, packedOverlay);
+        putaddVertex(buffer, pose, x2, y2, z2, u1, v1, nx, ny, nz, packedLight, packedOverlay);
+        putaddVertex(buffer, pose, x3, y3, z3, u1, v0, nx, ny, nz, packedLight, packedOverlay);
     }
 
 
-    private static void putVertex(VertexConsumer buffer, PoseStack.Pose pose,
+    private static void putaddVertex(VertexConsumer buffer, PoseStack.Pose pose,
                            float x, float y, float z,
                            float u, float v,
                            float nx, float ny, float nz,

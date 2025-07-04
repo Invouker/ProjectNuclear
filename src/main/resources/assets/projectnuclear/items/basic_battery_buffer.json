@@ -4,7 +4,7 @@
     "base": "minecraft:item/template_skull",
     "model": {
       "type": "projectnuclear:generic_overlay",
-      "front_side_texture": "coal_generator",
+      "front_side_texture": "battery_output_side",
       "texture": "projectnuclear:block/machine_casing"
     }
   }

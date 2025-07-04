@@ -19,7 +19,10 @@ public class ModCreativeTab {
             .icon(() -> new ItemStack(ModBlocks.COAL_GENERATOR.asItem()))
             .title(Component.translatable("creativetab.projectnuclear.tab"))
             .displayItems((itemDisplayParameters, output) -> {
+                output.accept(ModItems.DEBUGGER_ITEM);
+                output.accept(ModBlocks.BASIC_CABLE);
                 output.accept(ModBlocks.COAL_GENERATOR);
+                output.accept(ModBlocks.BASIC_BATTERY_BUFFER);
             }).build());
 
     public static void register(IEventBus modBus) {

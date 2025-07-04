@@ -1,5 +1,6 @@
 {
-	"itemGroup.project_nuclear": "Project Nuclear",
+	"creativetab.projectnuclear.tab": "Project Nuclear",
 	"block.projectnuclear.coal_generator":"Coal Generator",
-	"container.project_nuclear.coal_generator": "Coal Generator"
+	"container.project_nuclear.coal_generator": "Coal Generator",
+	"item.projectnuclear.debugger": "Energy Debugger"
 }

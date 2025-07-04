@@ -69,9 +69,8 @@ public record GenericOverlayItemRenderer(String itemName, ResourceLocation textu
             GenericOverlayRenderer.renderFace(side, poseStack, buffer, packedLight, packedOverlay, sprite, 0, false, false);
         }
 
-
         {
-            TextureAtlasSprite faceSprite = atlas.apply(ResourceLocation.fromNamespaceAndPath(Projectnuclear.MODID, "block/coal_generator"));
+            TextureAtlasSprite faceSprite = atlas.apply(ResourceLocation.fromNamespaceAndPath(Projectnuclear.MODID, "block/" + itemName));
             VertexConsumer faceBuffer = bufferSource.getBuffer(RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS));
 
             GenericOverlayRenderer.renderFace(Direction.SOUTH, poseStack, faceBuffer, packedLight, packedOverlay, faceSprite, 0, true, true);
@@ -98,7 +97,7 @@ public record GenericOverlayItemRenderer(String itemName, ResourceLocation textu
             boolean glow = tile.isOverlayGlowing(side);
             RenderType renderType = glow ? RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS) : RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS);
 
-            VertexConsumer overlayBuffer = bufferSource.getBuffer(renderType);
+            addVertexConsumer overlayBuffer = bufferSource.getBuffer(renderType);
             renderFace(side, poseStack, overlayBuffer, 0xF000F0, packedOverlay, overlaySprite, 0.002f, true, true);
         }*/
 
@@ -108,7 +107,7 @@ public record GenericOverlayItemRenderer(String itemName, ResourceLocation textu
     public record Unbaked(String itemName, ResourceLocation texture) implements SpecialModelRenderer.Unbaked {
         public static final MapCodec<GenericOverlayItemRenderer.Unbaked> MAP_CODEC =
                 RecordCodecBuilder.mapCodec(instance -> instance.group(
-                        Codec.STRING.fieldOf("item_name").forGetter(Unbaked::getItemName),
+                        Codec.STRING.fieldOf("front_side_texture").forGetter(Unbaked::getItemName),
                         ResourceLocation.CODEC.fieldOf("texture").forGetter(Unbaked::getTexture)
                 ).apply(instance, Unbaked::new));
 

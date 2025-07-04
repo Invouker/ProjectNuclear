@@ -27,6 +27,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,7 +36,6 @@ public class CoalGenerator extends BaseEntityBlock {
 
     public static final EnumProperty<Direction> FACING = BlockStateProperties.FACING;
     public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
-    //private final MapCodec<CoalGenerator> codec = MapCod
 
     public CoalGenerator(BlockBehaviour.Properties properties) {
         super(properties
@@ -72,15 +72,6 @@ public class CoalGenerator extends BaseEntityBlock {
             if (blockEntity instanceof MenuProvider provider) {
                 if(player instanceof ServerPlayer sPlayer && !player.isShiftKeyDown())
                     sPlayer.openMenu(provider);
-
-            }
-            if(player.isShiftKeyDown()) {
-                if (blockEntity instanceof IEnergyNode energyNode) {
-                    player.displayClientMessage(Component.literal("[Debug] " + energyNode.getDebugInfo()), false);
-                } else {
-                    player.displayClientMessage(Component.literal("[Debug] Not an energy node"), false);
-                }
-                return InteractionResult.SUCCESS;
             }
         }
         return InteractionResult.SUCCESS;
@@ -116,11 +107,12 @@ public class CoalGenerator extends BaseEntityBlock {
     }
 
     @Override
-    public void destroy(LevelAccessor level, BlockPos pos, BlockState state) {
-        super.destroy(level, pos, state);
+    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
         BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof IEnergyNode node) {
             EnergyNetManager.unregister(node);
         }
+        return super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid);
     }
+
 }

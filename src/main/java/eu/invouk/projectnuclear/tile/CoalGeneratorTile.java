@@ -3,6 +3,7 @@ package eu.invouk.projectnuclear.tile;
 import eu.invouk.projectnuclear.Projectnuclear;
 import eu.invouk.projectnuclear.blocks.CoalGenerator;
 import eu.invouk.projectnuclear.energynet.EnergyNet;
+import eu.invouk.projectnuclear.energynet.EnergyNetManager;
 import eu.invouk.projectnuclear.energynet.IEnergyProducer;
 import eu.invouk.projectnuclear.gui.menu.CoalGeneratorMenu;
 import eu.invouk.projectnuclear.models.IOverlayRenderable;
@@ -39,17 +40,13 @@ import java.util.Optional;
 public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOverlayRenderable, IEnergyProducer {
 
     private EnergyNet net;
-    private int storedEnergy = 0;
-    private final int maxEnergy = 10000;
-    private final int productionRate = 10;
     private final int voltage = 32; // LV
-    private final int maxOutputPerTick = 32;
 
     private int burnTime = 0;       // Koľko tickov ešte horí palivo
     private int maxBurnTime = 0;
-    private final int energyPerTick = 100; // Koľko energie vyrobí za jeden tick
+    private final int energyPerTick = 97; // Koľko energie vyrobí za jeden tick
 
-    private MachineRenderer machineRenderer;
+    private final MachineRenderer machineRenderer;
 
     private boolean active;
 
@@ -66,6 +63,11 @@ public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOve
     public CoalGeneratorTile(BlockPos blockPos, BlockState blockState) {
         super(ModBlocksEntities.COAL_GENERATOR_TILE.get(), blockPos, blockState);
         machineRenderer = new MachineRenderer();
+    }
+
+    @Override
+    public BlockPos getPosition() {
+        return this.worldPosition;
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, CoalGeneratorTile blockEntity) {
@@ -85,9 +87,6 @@ public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOve
             if(energyAdded > 0)
                 dirty = true;
 
-            if(blockEntity.net != null)
-                blockEntity.net.addProducer(blockEntity);
-            //st.setActive(true);
         }
         if(blockEntity.burnTime <= 0) {
             ItemStack fuelStack = blockEntity.itemHandler.getStackInSlot(0);
@@ -158,7 +157,6 @@ public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOve
         energyStorage.deserializeNBT(registries, tag.get("energyStorage"));
         Optional<CompoundTag> invTag = tag.getCompound("inventory");
         itemHandler.deserializeNBT(registries, invTag.orElse(null));
-
     }
 
     @Override
@@ -168,13 +166,18 @@ public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOve
         tag.put("inventory", itemHandler.serializeNBT(registries));
     }
 
-    // Getter pre handler (napr. pre Menu)
     public BurnableItemStackHandler getItemHandler() {
         return itemHandler;
     }
 
+    @Override
     public EnergyStorage getEnergyStorage() {
         return energyStorage;
+    }
+
+    @Override
+    public void consumeProducedEnergy(int amount) {
+        energyStorage.extractEnergy(amount, false);
     }
 
     public void setActive(boolean active) {
@@ -229,12 +232,14 @@ public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOve
 
     @Override
     public int produceEnergy() {
-        return 10;
+        int voltage = getVoltage();
+        int energyStored = energyStorage.getEnergyStored();
+        return Math.min(voltage, energyStored);  // len vrát množstvo, neuberaj
     }
 
     @Override
     public int getVoltage() {
-        return 0;
+        return voltage;
     }
 
     @Override
@@ -248,19 +253,21 @@ public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOve
     }
 
     @Override
-    public String getDebugInfo() {
-        return String.format(
-                "%s [pos=%s, voltage=%dV, produceEnergy=%dV, netValid=%s]",
-                getClass().getSimpleName(),
-                getBlockPos(),
-                getVoltage(),
-                produceEnergy(),
-                getEnergyNet() != null && getEnergyNet().isValid()
-        );
+    public void explode() {
+        System.out.println("Exploding coal generator");
     }
 
     @Override
-    public void explode() {
+    public void onLoad() {
+        super.onLoad();
+        EnergyNetManager.register(this) ;
+    }
 
+    @Override
+    public void setRemoved() {
+        super.setRemoved();
+        if (level != null && !level.isClientSide()) {
+            EnergyNetManager.enqueueUnregister(this);
+        }
     }
 }
