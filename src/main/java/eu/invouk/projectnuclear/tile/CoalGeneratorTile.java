@@ -47,11 +47,36 @@ public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOve
     private final int energyPerTick = 97; // Koľko energie vyrobí za jeden tick
 
     private final MachineRenderer machineRenderer;
-
     private boolean active;
 
     private final SimpleContainerData containerData = new SimpleContainerData(3);
-    private final EnergyStorage energyStorage = new EnergyStorage(1000000, 128);
+    private final EnergyStorage energyStorage = new EnergyStorage(1000000, 128) {
+        @Override
+        public int receiveEnergy(int maxReceive, boolean simulate) {
+            int received = super.receiveEnergy(maxReceive, simulate);
+            if (!simulate && received > 0) {
+                onEnergyChanged();
+            }
+            return received;
+        }
+
+        @Override
+        public int extractEnergy(int maxExtract, boolean simulate) {
+            int extracted = super.extractEnergy(maxExtract, simulate);
+            if (!simulate && extracted > 0) {
+                onEnergyChanged();
+            }
+            return extracted;
+        }
+    };
+
+    private void onEnergyChanged() {
+        if (level != null && !level.isClientSide()) {
+            setChanged();
+            level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
+        }
+    }
+
     private final BurnableItemStackHandler itemHandler = new BurnableItemStackHandler(1) {
         @Override
         protected void onContentsChanged(int slot) {
@@ -82,6 +107,7 @@ public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOve
         }
 
         if(blockEntity.burnTime > 0) {
+            blockEntity.setActive(true);
             blockEntity.burnTime--;
             int energyAdded = blockEntity.energyStorage.receiveEnergy(blockEntity.energyPerTick, false);
             if(energyAdded > 0)
