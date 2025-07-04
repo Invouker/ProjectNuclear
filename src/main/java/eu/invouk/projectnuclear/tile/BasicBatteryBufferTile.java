@@ -20,7 +20,7 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.energy.EnergyStorage;
 import org.jetbrains.annotations.Nullable;
 
-public class BasicBatteryBufferTile extends BlockEntity implements IBufferEnergyConsumer, IBufferEnergyProducer, IOverlayRenderable {
+public class BasicBatteryBufferTile extends BlockEntity implements IOverlayRenderable, IEnergyConsumer, IEnergyProducer {
 
     private EnergyNet net;
     private final int voltage = 32;
@@ -156,11 +156,6 @@ public class BasicBatteryBufferTile extends BlockEntity implements IBufferEnergy
     }
 
     @Override
-    public void consumeProducedEnergy(int amount) {
-        energyStorage.extractEnergy(amount, false);
-    }
-
-    @Override
     public EnergyNet getEnergyNet() {
         return net;
     }
@@ -188,22 +183,16 @@ public class BasicBatteryBufferTile extends BlockEntity implements IBufferEnergy
             EnergyNetManager.enqueueUnregister(this);
         }
     }
+
     @Override
-    public int storeEnergy(int excessWatts, int voltage) {
-        if (voltage > this.voltage) {
-            explode();
-            return 0;
-        }
+    public void consumeProducedEnergy(int amount) {
+        energyStorage.extractEnergy(amount, false);
+    }
 
-        int maxAccept = energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored();
-        int toAccept = Math.min(maxAccept, excessWatts);
-        int accepted = energyStorage.receiveEnergy(toAccept, false);
-
-        if (accepted > 0 && net != null) {
-            net.invalidate();
-        }
-
-        return accepted;
+    @Override
+    public boolean canAcceptEnergyFrom(Direction directionToConsumer) {
+        Direction front = this.getBlockState().getValue(CoalGenerator.FACING);
+        return front != directionToConsumer;
     }
 
     private static final ResourceLocation TEXTURE_OUTPUT_SIDE  = ResourceLocation.fromNamespaceAndPath(Projectnuclear.MODID, "block/battery_output_side");

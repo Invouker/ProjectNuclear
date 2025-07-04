@@ -121,10 +121,10 @@ public class EnergyNetManager {
         if (level.isClientSide()) return;
         synchronized (allNets) {
             Iterator<EnergyNet> it = allNets.iterator();
+            allNets.removeIf(net -> !net.isValid());
             while (it.hasNext()) {
                 EnergyNet net = it.next();
-                if (!net.isValid()) it.remove();
-                else net.tick();
+                net.tick();
             }
         }
         processRebuildQueue();

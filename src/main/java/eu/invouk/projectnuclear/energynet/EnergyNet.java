@@ -1,5 +1,6 @@
 package eu.invouk.projectnuclear.energynet;
 
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.core.BlockPos;
@@ -72,7 +73,8 @@ public class EnergyNet {
             isDirty = false;
         }
 
-        for (IEnergyProducer producer : producers) {
+        List<IEnergyProducer> producersSnapshot = new ArrayList<>(producers);
+        for (IEnergyProducer producer : producersSnapshot) {
             int producedEnergy = producer.produceEnergy();
             if (producedEnergy <= 0) continue;
 
@@ -110,13 +112,28 @@ public class EnergyNet {
                             int consumed = consumer.consumeEnergy(remainingEnergy.get(), voltage);
                             remainingEnergy.addAndGet(-consumed);
                             producer.consumeProducedEnergy(consumed);
-                            // NESMIEŠ ukončiť BFS vetvu tu!
                         }
                     }
                 }
 
                 for (IEnergyNode neighbor : getAdjacentNodes(current)) {
                     if (!visited.containsKey(neighbor)) {
+                        // Získaj pozície oboch
+                        BlockPos currentPos = ((BlockEntity) current).getBlockPos();
+                        BlockPos neighborPos = ((BlockEntity) neighbor).getBlockPos();
+
+                        // Zisti smer od neighbor -> current (odkiaľ by energia prichádzala do neighbor)
+                        Direction directionToNeighbor = Direction.getNearest(
+                                currentPos.getX() - neighborPos.getX(),
+                                currentPos.getY() - neighborPos.getY(),
+                                currentPos.getZ() - neighborPos.getZ(),
+                                Direction.UP);
+
+                        // Ak je neighbor consumer, over či môže prijímať z tohto smeru
+                        if (neighbor instanceof IEnergyConsumer consumer) {
+                            if (!consumer.canAcceptEnergyFrom(directionToNeighbor)) continue; // preskoč ak nemôže prijímať
+                        }
+
                         visited.put(neighbor, distance + 1);
                         queue.add(neighbor);
                     }
@@ -132,6 +149,24 @@ public class EnergyNet {
                 producer.explode();
             }
         }
+    }
+
+    private Direction getDirectionFromTo(BlockEntity from, BlockEntity to) {
+        BlockPos posFrom = from.getBlockPos();
+        BlockPos posTo = to.getBlockPos();
+        int dx = posTo.getX() - posFrom.getX();
+        int dy = posTo.getY() - posFrom.getY();
+        int dz = posTo.getZ() - posFrom.getZ();
+
+        for (Direction dir : Direction.values()) {
+            if (dir.getStepX() == Integer.signum(dx) &&
+                    dir.getStepY() == Integer.signum(dy) &&
+                    dir.getStepZ() == Integer.signum(dz)) {
+                return dir;
+            }
+        }
+        // fallback
+        return Direction.NORTH;
     }
 
     private synchronized void recalculateNetwork() {
