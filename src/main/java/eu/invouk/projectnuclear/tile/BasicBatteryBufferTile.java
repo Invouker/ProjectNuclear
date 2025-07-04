@@ -16,8 +16,8 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.energy.EnergyStorage;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class BasicBatteryBufferTile extends BlockEntity implements IOverlayRenderable, IEnergyConsumer, IEnergyProducer {
@@ -27,12 +27,18 @@ public class BasicBatteryBufferTile extends BlockEntity implements IOverlayRende
     private final MachineRenderer machineRenderer;
 
 
+    private static final ResourceLocation TEXTURE_MACHINE_BLOCK           = ResourceLocation.fromNamespaceAndPath(Projectnuclear.MODID, "block/machine_casing");
+    private static final ResourceLocation TEXTURE_OUTPUT_SIDE  = ResourceLocation.fromNamespaceAndPath(Projectnuclear.MODID, "block/battery_output_side");
+    public BasicBatteryBufferTile( BlockPos pos, BlockState blockState) {
+        super(ModBlocksEntities.BASIC_BATTERY_BUFFER.get(), pos, blockState);
+        machineRenderer = new MachineRenderer();
+    }
+
     private final EnergyStorage energyStorage = new EnergyStorage(100000, voltage) {
         @Override
         public int receiveEnergy(int maxReceive, boolean simulate) {
             int received = super.receiveEnergy(maxReceive, simulate);
             if (!simulate && received > 0) {
-                // Zavoláme metódu na označenie zmeny a odoslanie paketu
                 onEnergyChanged();
             }
             return received;
@@ -42,7 +48,6 @@ public class BasicBatteryBufferTile extends BlockEntity implements IOverlayRende
         public int extractEnergy(int maxExtract, boolean simulate) {
             int extracted = super.extractEnergy(maxExtract, simulate);
             if (!simulate && extracted > 0) {
-                // Zavoláme metódu na označenie zmeny a odoslanie paketu
                 onEnergyChanged();
             }
             return extracted;
@@ -56,16 +61,10 @@ public class BasicBatteryBufferTile extends BlockEntity implements IOverlayRende
         }
     }
 
-    public BasicBatteryBufferTile( BlockPos pos, BlockState blockState) {
-        super(ModBlocksEntities.BASIC_BATTERY_BUFFER.get(), pos, blockState);
-        machineRenderer = new MachineRenderer();
-    }
-
     @Override
     public BlockPos getPosition() {
         return this.worldPosition;
     }
-
 
     @Override
     public int consumeEnergy(int available, int voltage) {
@@ -139,7 +138,7 @@ public class BasicBatteryBufferTile extends BlockEntity implements IOverlayRende
     }
 
     @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+    public @NotNull CompoundTag getUpdateTag(HolderLookup.@NotNull Provider registries) {
         CompoundTag tag = new CompoundTag();
         saveAdditional(tag, registries);
         return tag;
@@ -194,10 +193,6 @@ public class BasicBatteryBufferTile extends BlockEntity implements IOverlayRende
         Direction front = this.getBlockState().getValue(CoalGenerator.FACING);
         return front != directionToConsumer;
     }
-
-    private static final ResourceLocation TEXTURE_OUTPUT_SIDE  = ResourceLocation.fromNamespaceAndPath(Projectnuclear.MODID, "block/battery_output_side");
-    private static final ResourceLocation TEXTURE_MACHINE_BLOCK           = ResourceLocation.fromNamespaceAndPath(Projectnuclear.MODID, "block/machine_casing");
-
 
     @Override
     public @Nullable ResourceLocation getMachineTexture() {

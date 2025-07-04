@@ -1,9 +1,9 @@
 package eu.invouk.projectnuclear.energynet;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.core.BlockPos;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;

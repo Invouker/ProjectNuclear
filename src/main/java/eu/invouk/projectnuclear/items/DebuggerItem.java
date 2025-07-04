@@ -1,10 +1,10 @@
 package eu.invouk.projectnuclear.items;
 
-import eu.invouk.projectnuclear.energynet.*;
+import eu.invouk.projectnuclear.energynet.EnergyNet;
+import eu.invouk.projectnuclear.energynet.IEnergyConsumer;
+import eu.invouk.projectnuclear.energynet.IEnergyNode;
+import eu.invouk.projectnuclear.energynet.IEnergyProducer;
 import eu.invouk.projectnuclear.models.BlockHighlightRenderer;
-import eu.invouk.projectnuclear.tile.BasicBatteryBufferTile;
-import eu.invouk.projectnuclear.tile.BasicCableTile;
-import eu.invouk.projectnuclear.tile.CoalGeneratorTile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;

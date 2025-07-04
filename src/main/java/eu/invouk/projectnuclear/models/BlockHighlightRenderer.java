@@ -1,10 +1,9 @@
 package eu.invouk.projectnuclear.models;
 
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import eu.invouk.projectnuclear.Projectnuclear;
 import eu.invouk.projectnuclear.energynet.IEnergyCable;
-import eu.invouk.projectnuclear.energynet.IEnergyConsumer;
-import eu.invouk.projectnuclear.energynet.IEnergyNode;
 import eu.invouk.projectnuclear.energynet.IEnergyProducer;
 import eu.invouk.projectnuclear.items.DebuggerItem;
 import eu.invouk.projectnuclear.tile.BasicBatteryBufferTile;
