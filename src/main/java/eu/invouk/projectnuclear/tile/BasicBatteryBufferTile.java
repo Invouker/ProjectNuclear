@@ -24,7 +24,6 @@ public class BasicBatteryBufferTile extends BlockEntity implements IBufferEnergy
 
     private EnergyNet net;
     private final int voltage = 32;
-    private Direction outputDirection = Direction.NORTH; // alebo default podľa blockstate
     private final MachineRenderer machineRenderer;
 
 
@@ -77,6 +76,7 @@ public class BasicBatteryBufferTile extends BlockEntity implements IBufferEnergy
 
         // Neprijímaj energiu z output smeru
         if (net != null) {
+            Direction outputDirection = this.getBlockState().getValue(CoalGenerator.FACING);
             BlockEntity from = level.getBlockEntity(worldPosition.relative(outputDirection));
             if (from instanceof IEnergyProducer) {
                 return 0;
@@ -106,6 +106,7 @@ public class BasicBatteryBufferTile extends BlockEntity implements IBufferEnergy
         if (energyStorage.getEnergyStored() <= 0) return 0;
 
         // Skontroluj, či na outputDirection je niekto, kto vie prijímať energiu
+        Direction outputDirection = this.getBlockState().getValue(CoalGenerator.FACING);
         BlockEntity be = level.getBlockEntity(worldPosition.relative(outputDirection));
         if (be == null) return 0;
 
@@ -187,17 +188,6 @@ public class BasicBatteryBufferTile extends BlockEntity implements IBufferEnergy
             EnergyNetManager.enqueueUnregister(this);
         }
     }
-
-    @Override
-    public String toString() {
-        return "BasicBatteryBufferTile{" +
-                "net=" + net +
-                ", voltage=" + voltage +
-                ", outputDirection=" + outputDirection +
-                ", energyStorage=" + energyStorage +
-                '}';
-    }
-
     @Override
     public int storeEnergy(int excessWatts, int voltage) {
         if (voltage > this.voltage) {
