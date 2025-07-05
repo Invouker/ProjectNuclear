@@ -1,5 +1,6 @@
 package eu.invouk.projectnuclear.energynet;
 
+import eu.invouk.projectnuclear.tile.BasicCableTile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -18,6 +19,9 @@ public class EnergyNet {
     private boolean valid = true;
     private boolean isDirty = false;
     private boolean isHighlighted = false;
+
+    private int totalEnergyTransferredThisTick = 0;
+
 
     public EnergyNet(ServerLevel level) {
         this.level = level;
@@ -73,6 +77,8 @@ public class EnergyNet {
             if (producedEnergy <= 0) continue;
 
             int voltage = producer.getEnergyTier().getMaxTransferPerTick();
+            int producerTierLimit = producer.getEnergyTier().getMaxTransferPerTick();
+            int transferableEnergy = Math.min(producedEnergy, producerTierLimit);
 
             Map<IEnergyNode, Integer> visited = new HashMap<>();
             Queue<IEnergyNode> queue = new LinkedList<>();
@@ -80,7 +86,7 @@ public class EnergyNet {
             visited.put(producer, 0);
 
             boolean overvoltageDetected = false;
-            AtomicInteger remainingEnergy = new AtomicInteger(producedEnergy);
+            AtomicInteger remainingEnergy = new AtomicInteger(transferableEnergy);
 
             while (!queue.isEmpty()) {
                 IEnergyNode node = queue.poll();
@@ -90,20 +96,16 @@ public class EnergyNet {
                     if (node instanceof IEnergyCable cable) {
                         int cableLimit = cable.getTier().getMaxTransferPerTick();
 
-                        // Overvoltage kontrola:
                         if (voltage > cableLimit) {
                             System.out.println("[EnergyNet] Overvoltage! Exploding cable at " + ((BlockEntity) cable).getBlockPos());
                             cable.explode();
                             overvoltageDetected = true;
                             break;
                         }
-
-                        // Limituj prenos podľa kabeláže:
-                        int transferable = Math.min(remainingEnergy.get(), cableLimit);
-                        remainingEnergy.set(transferable);
-
-                    } else if (node instanceof IEnergyConsumer consumer) {
-                        if (voltage > consumer.getEnergyTier().getMaxTransferPerTick()) {
+                    }
+                    else if (node instanceof IEnergyConsumer consumer) {
+                        int consumerLimit = consumer.getEnergyTier().getMaxTransferPerTick();
+                        if (voltage > consumerLimit) {
                             System.out.println("[EnergyNet] Overvoltage! Exploding consumer at " + ((BlockEntity) consumer).getBlockPos());
                             consumer.explode();
                             overvoltageDetected = true;
@@ -114,6 +116,8 @@ public class EnergyNet {
                             int consumed = consumer.consumeEnergy(remainingEnergy.get(), voltage);
                             remainingEnergy.addAndGet(-consumed);
                             producer.consumeProducedEnergy(consumed);
+
+                            totalEnergyTransferredThisTick += consumed;
                         }
                     }
                 }
@@ -148,8 +152,11 @@ public class EnergyNet {
                 producer.explode();
             }
         }
+        if(totalEnergyTransferredThisTick != 0) {
+            System.out.println("[EnergyNet] Total energy transferred this tick: " + totalEnergyTransferredThisTick + " Voltov");
+            totalEnergyTransferredThisTick = 0; // reset na nový tick
+        }
     }
-
 
     private synchronized void recalculateNetwork() {
         System.out.println("[EnergyNet] Recalculating network connectivity...");
