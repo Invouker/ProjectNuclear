@@ -75,6 +75,5 @@ public class Projectnuclear {
         public static void onRegisterMenuScreens(RegisterMenuScreensEvent event) {
             event.register(ModMenuTypes.COAL_GENERATOR_MENU.get(), CoalGeneratorScreen::new);
         }
-
     }
 }

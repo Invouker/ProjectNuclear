@@ -258,7 +258,7 @@ public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOve
     }
 
     @Override
-    public int produceEnergy() {
+    public int produceEnergy() { // How much energy can produce.
         int voltage = eEnergyTier.getMaxTransferPerTick();
         int energyStored = energyStorage.getEnergyStored();
         return Math.min(voltage, energyStored);  // len vrát množstvo, neuberaj

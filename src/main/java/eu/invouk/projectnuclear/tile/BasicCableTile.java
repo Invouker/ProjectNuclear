@@ -62,4 +62,26 @@ public class BasicCableTile extends BlockEntity implements IEnergyCable {
     public EEnergyTier getTier() {
         return EEnergyTier.ULV;
     }
+
+
+    /* For debugging purpose */
+    private int energyTransferredThisTick = 0;
+
+    @Override
+    public void addEnergyTransferredThisTick(int amount) {
+        energyTransferredThisTick += amount;
+        System.out.println("Cable at " + getPosition() + " transferred += " + amount);
+    }
+
+    @Override
+    public void resetEnergyTransferredThisTick() {
+        energyTransferredThisTick = 0;
+    }
+
+    @Override
+    public int getEnergyTransferredThisTick() {
+        return energyTransferredThisTick;
+    }
+
+
 }

@@ -69,7 +69,6 @@ public class EnergyNetManager {
     }
 
     public static void rebuildEnergyNetFrom(IEnergyNode start) {
-        System.out.println("RebuildEnergyNet Start");
         BlockEntity startBe = (BlockEntity) start;
         Level level = startBe.getLevel();
         if (level == null || level.isClientSide()) return;
@@ -103,19 +102,14 @@ public class EnergyNetManager {
         for (IEnergyNode node : visited) newNet.registerNode(node);
         newNet.setValid(true);
         addNet(newNet);
-        System.out.println("RebuildEnergyNet Finish");
     }
 
     public static void addNet(EnergyNet net) {
-        System.out.println("AddNet Start");
         allNets.add(net);
-        System.out.println("AddNet Finish");
     }
 
     public static void removeNet(EnergyNet net) {
-        System.out.println("RemoveNet Start");
         allNets.remove(net);
-        System.out.println("RemoveNet Finish");
     }
 
     public synchronized static void tick(Level level) {
@@ -139,7 +133,6 @@ public class EnergyNetManager {
         }
     }
 
-    // Nová metóda na spracovanie odregistrovania
     private static void processUnregisterQueue() {
         synchronized (unregisterQueue) {
             while (!unregisterQueue.isEmpty()) {

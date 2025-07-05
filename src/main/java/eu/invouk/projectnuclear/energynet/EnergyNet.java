@@ -54,6 +54,12 @@ public class EnergyNet {
     public synchronized void tick() {
         if (!valid) return;
 
+        for (IEnergyNode node : nodes) {
+            if (node instanceof IEnergyCable cable) {
+                cable.resetEnergyTransferredThisTick();
+            }
+        }
+
         for (IEnergyProducer producer : producers) {
             int producedEnergy = producer.produceEnergy();
             if (producedEnergy > 0) {
@@ -111,6 +117,7 @@ public class EnergyNet {
                     iterator.remove();
                     continue;
                 }
+                cable.addEnergyTransferredThisTick(Math.min(packet.energy, packet.voltage));
             }
             else if (be instanceof IEnergyConsumer consumer) {
                 // Overíme kapacitu spotrebiča
