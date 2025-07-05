@@ -53,13 +53,6 @@ public class EnergyNet {
         System.out.println("RemovedNode Finish");
     }
 
-    public void merge(EnergyNet other) {
-        if (other == this) return;
-        System.out.println("[EnergyNet] Merging net with " + other.nodes.size() + " nodes into this net with " + this.nodes.size() + " nodes");
-        for (IEnergyNode node : other.nodes) registerNode(node);
-        other.invalidate();
-    }
-
     public synchronized void invalidate() {
         System.out.println("[EnergyNet] Invalidating net with " + nodes.size() + " nodes");
         valid = false;
