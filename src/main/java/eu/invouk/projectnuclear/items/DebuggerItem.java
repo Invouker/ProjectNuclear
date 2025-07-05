@@ -1,9 +1,6 @@
 package eu.invouk.projectnuclear.items;
 
-import eu.invouk.projectnuclear.energynet.EnergyNet;
-import eu.invouk.projectnuclear.energynet.IEnergyConsumer;
-import eu.invouk.projectnuclear.energynet.IEnergyNode;
-import eu.invouk.projectnuclear.energynet.IEnergyProducer;
+import eu.invouk.projectnuclear.energynet.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -55,13 +52,13 @@ public class DebuggerItem extends Item {
             }
 
             player.displayClientMessage(Component.literal("=== EnergyNet info ==="), false);
-            player.displayClientMessage(Component.literal("Počet uzlov: " + net.getAllNodes().size()), false);
+            player.displayClientMessage(Component.literal("Počet uzlov: " + net.getNodes().size()), false);
             player.displayClientMessage(Component.literal("Sieť validná: " + net.isValid()), false);
             player.displayClientMessage(Component.empty(),false);
 
-            net.setHighlighted(!net.isHighlighted());
+            net.setHighlighted(net.isHighlighted());
 
-            for (IEnergyNode node : net.getAllNodes()) {
+            for (IEnergyNode node : net.getNodes()) {
 
 /*
                 if (BlockHighlightRenderer.getHighlightedBlocks().contains(node.getPosition()))

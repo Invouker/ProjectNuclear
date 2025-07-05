@@ -41,9 +41,9 @@ public class BlockHighlightRenderer {
         //if(minecraft.player != null && !(minecraft.player.getMainHandItem().getItem() instanceof DebuggerItem)) return;
 
         for (EnergyNet energyNets : EnergyNetManager.getCopyOfEnergyNets()) {
-            if(!energyNets.isHighlighted()) continue;
+            if(energyNets.isHighlighted()) continue;
 
-            for (IEnergyNode node : energyNets.getAllNodes()) {
+            for (IEnergyNode node : energyNets.getNodes()) {
                 BlockEntity blockEntity = (BlockEntity) node;
                 BlockPos blockPos = blockEntity.getBlockPos();
                 List<String> Text3D = getNodeInfo(blockPos, blockEntity);
