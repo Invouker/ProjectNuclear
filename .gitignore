@@ -22,3 +22,8 @@ hs_err_pid*
 /build/
 /.gradle/
 /.idea/
+/src/main/resources/assets/projectnuclear/textures/gui/coal_generator.bbmodel
+/src/main/resources/assets/projectnuclear/textures/gui/coal_generator.png-001
+
+#Only for now
+/src/main/resources/projectnuclear.mixins.json
