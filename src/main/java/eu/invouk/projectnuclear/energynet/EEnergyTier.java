@@ -17,4 +17,11 @@ public enum EEnergyTier {
     public int getMaxTransferPerTick() {
         return maxTransferPerTick;
     }
+
+    @Override
+    public String toString() {
+        return "EEnergyTier{" +
+                "maxTransferPerTick=" + maxTransferPerTick +
+                '}';
+    }
 }
