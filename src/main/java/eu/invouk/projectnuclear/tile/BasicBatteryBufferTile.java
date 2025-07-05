@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 public class BasicBatteryBufferTile extends BlockEntity implements IOverlayRenderable, IEnergyConsumer, IEnergyProducer {
 
     private EnergyNet net;
-    private final int voltage = 32;
+    private final EEnergyTier eEnergyTier = EEnergyTier.ULV;
     private final MachineRenderer machineRenderer;
 
 
@@ -34,7 +34,7 @@ public class BasicBatteryBufferTile extends BlockEntity implements IOverlayRende
         machineRenderer = new MachineRenderer();
     }
 
-    private final EnergyStorage energyStorage = new EnergyStorage(100000, voltage) {
+    private final EnergyStorage energyStorage = new EnergyStorage(100000, eEnergyTier.getMaxTransferPerTick()) {
         @Override
         public int receiveEnergy(int maxReceive, boolean simulate) {
             int received = super.receiveEnergy(maxReceive, simulate);
@@ -68,7 +68,7 @@ public class BasicBatteryBufferTile extends BlockEntity implements IOverlayRende
 
     @Override
     public int consumeEnergy(int available, int voltage) {
-        if (voltage > this.voltage) {
+        if (voltage > this.eEnergyTier.getMaxTransferPerTick()) {
             explode();
             return 0;
         }
@@ -111,7 +111,6 @@ public class BasicBatteryBufferTile extends BlockEntity implements IOverlayRende
 
         // Ak tam je IEnergyConsumer alebo IBufferEnergyConsumer alebo kábel
         if (!(be instanceof IEnergyConsumer) &&
-                !(be instanceof IBufferEnergyConsumer) &&
                 !(be instanceof IEnergyCable)) {
             return 0; // na výstupe nie je konzument ani kábel
         }
@@ -119,10 +118,12 @@ public class BasicBatteryBufferTile extends BlockEntity implements IOverlayRende
         // Vypočítaj koľko môže batéria maximálne poslať na tick
         return Math.min(energyStorage.getEnergyStored(), 50);
     }
+
     @Override
-    public int getVoltage() {
-        return voltage;
+    public EEnergyTier getEnergyTier() {
+        return eEnergyTier;
     }
+
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {

@@ -6,7 +6,7 @@ import net.neoforged.neoforge.energy.EnergyStorage;
 public interface IEnergyConsumer extends IEnergyNode{
     int consumeEnergy(int available, int voltage);
     int getPriority();
-    int getVoltage();
+    EEnergyTier getEnergyTier();
     boolean isAlive();
     EnergyStorage getEnergyStorage();
     default boolean canAcceptEnergyFrom(Direction directionToConsumer) {return true;}

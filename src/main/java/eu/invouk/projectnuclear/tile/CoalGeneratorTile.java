@@ -2,6 +2,7 @@ package eu.invouk.projectnuclear.tile;
 
 import eu.invouk.projectnuclear.Projectnuclear;
 import eu.invouk.projectnuclear.blocks.CoalGenerator;
+import eu.invouk.projectnuclear.energynet.EEnergyTier;
 import eu.invouk.projectnuclear.energynet.EnergyNet;
 import eu.invouk.projectnuclear.energynet.EnergyNetManager;
 import eu.invouk.projectnuclear.energynet.IEnergyProducer;
@@ -40,7 +41,7 @@ import java.util.Optional;
 public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOverlayRenderable, IEnergyProducer {
 
     private EnergyNet net;
-    private final int voltage = 32; // LV
+    private final EEnergyTier eEnergyTier = EEnergyTier.ULV;
 
     private int burnTime = 0;       // Koľko tickov ešte horí palivo
     private int maxBurnTime = 0;
@@ -258,14 +259,14 @@ public class CoalGeneratorTile extends BlockEntity implements MenuProvider, IOve
 
     @Override
     public int produceEnergy() {
-        int voltage = getVoltage();
+        int voltage = eEnergyTier.getMaxTransferPerTick();
         int energyStored = energyStorage.getEnergyStored();
         return Math.min(voltage, energyStored);  // len vrát množstvo, neuberaj
     }
 
     @Override
-    public int getVoltage() {
-        return voltage;
+    public EEnergyTier getEnergyTier() {
+        return eEnergyTier;
     }
 
     @Override

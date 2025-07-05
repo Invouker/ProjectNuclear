@@ -80,7 +80,7 @@ public class DebuggerItem extends Item {
                     player.displayClientMessage(Component.literal("-C- Stored energy: " + consumer.getEnergyStorage().getEnergyStored()), false);
                     player.displayClientMessage(Component.literal("-C- Max energy stored: " + consumer.getEnergyStorage().getMaxEnergyStored()), false);
                     player.displayClientMessage(Component.literal("-C- Priority: " + consumer.getPriority()), false);
-                    player.displayClientMessage(Component.literal("-C- Voltage: " + consumer.getVoltage()), false);
+                    player.displayClientMessage(Component.literal("-C- Voltage: " + consumer.getEnergyTier()), false);
                     player.displayClientMessage(Component.literal("-C- IsAlive: " + consumer.isAlive()), false);
                 } /*else if (node instanceof IEnergyCable cable){
                     player.displayClientMessage(Component.literal("-- Priority: " + cable.getVoltageRating()), false);

@@ -1,31 +1,21 @@
 package eu.invouk.projectnuclear.tile;
 
+import eu.invouk.projectnuclear.energynet.EEnergyTier;
 import eu.invouk.projectnuclear.energynet.EnergyNet;
 import eu.invouk.projectnuclear.energynet.EnergyNetManager;
 import eu.invouk.projectnuclear.energynet.IEnergyCable;
 import eu.invouk.projectnuclear.register.ModBlocksEntities;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class BasicCableTile extends BlockEntity implements IEnergyCable {
 
     private EnergyNet energyNet;
-    private static final int VOLTAGE_RATING = 32;
-    private static final int CAPACITY = 1;
 
     public BasicCableTile(BlockPos blockPos, BlockState blockState) {
         super(ModBlocksEntities.BASIC_CABLE_TILE.get(), blockPos, blockState);
-    }
-
-    @Override
-    public int getVoltageRating() {
-        return VOLTAGE_RATING;
-    }
-
-    @Override
-    public int getCapacity() {
-        return CAPACITY;
     }
 
     @Override
@@ -42,21 +32,14 @@ public class BasicCableTile extends BlockEntity implements IEnergyCable {
     public void explode() {
         System.out.println("Explode cable! due to overvoltage.");
         //level.destroyBlock(getBlockPos(), false);
+        var pos = this.getBlockPos();
+        level.explode(null, pos.getX(), pos.getY(), pos.getZ(), 0.1f, Level.ExplosionInteraction.BLOCK);
+        //level.playLocalSound(this.getBlockPos(), , SoundSource.BLOCKS, 1f, 1f, true);
     }
 
     @Override
     public BlockPos getPosition() {
         return this.worldPosition;
-    }
-
-    @Override
-    public String getDebugInfo() {
-        return String.format(
-                "%s [pos=%s, voltageRating=%dV, netValid=%s]",
-                getClass().getSimpleName(),
-                getBlockPos(),
-                getVoltageRating()
-        );
     }
 
     @Override
@@ -73,5 +56,10 @@ public class BasicCableTile extends BlockEntity implements IEnergyCable {
         if (level != null && !level.isClientSide()) {
             EnergyNetManager.enqueueUnregister(this);
         }
+    }
+
+    @Override
+    public EEnergyTier getTier() {
+        return EEnergyTier.ULV;
     }
 }

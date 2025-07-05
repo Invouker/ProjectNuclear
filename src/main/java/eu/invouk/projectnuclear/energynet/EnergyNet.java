@@ -79,7 +79,7 @@ public class EnergyNet {
             int producedEnergy = producer.produceEnergy();
             if (producedEnergy <= 0) continue;
 
-            int voltage = producer.getVoltage();
+            int voltage = producer.getEnergyTier().getMaxTransferPerTick();
 
             Map<IEnergyNode, Integer> visited = new HashMap<>();
             Queue<IEnergyNode> queue = new LinkedList<>();
@@ -90,26 +90,34 @@ public class EnergyNet {
             AtomicInteger remainingEnergy = new AtomicInteger(producedEnergy);
 
             while (!queue.isEmpty()) {
-                IEnergyNode current = queue.poll();
-                int distance = visited.get(current);
+                IEnergyNode node = queue.poll();
+                int distance = visited.get(node);
 
-                if (current != producer) {
-                    if (current instanceof IEnergyCable cable) {
-                        if (voltage > cable.getVoltageRating()) {
+                if (node != producer) {
+                    if (node instanceof IEnergyCable cable) {
+                        int cableLimit = cable.getTier().getMaxTransferPerTick();
+
+                        // Overvoltage kontrola:
+                        if (voltage > cableLimit) {
                             System.out.println("[EnergyNet] Overvoltage! Exploding cable at " + ((BlockEntity) cable).getBlockPos());
                             cable.explode();
                             overvoltageDetected = true;
                             break;
                         }
-                    } else if (current instanceof IEnergyConsumer consumer) {
-                        if (voltage > consumer.getVoltage()) {
+
+                        // Limituj prenos podľa kabeláže:
+                        int transferable = Math.min(remainingEnergy.get(), cableLimit);
+                        remainingEnergy.set(transferable);
+
+                    } else if (node instanceof IEnergyConsumer consumer) {
+                        if (voltage > consumer.getEnergyTier().getMaxTransferPerTick()) {
                             System.out.println("[EnergyNet] Overvoltage! Exploding consumer at " + ((BlockEntity) consumer).getBlockPos());
                             consumer.explode();
                             overvoltageDetected = true;
                             break;
                         }
 
-                        if (consumer.isAlive() && consumer.getVoltage() == voltage) {
+                        if (consumer.isAlive() && consumer.getEnergyTier().getMaxTransferPerTick() == voltage) {
                             int consumed = consumer.consumeEnergy(remainingEnergy.get(), voltage);
                             remainingEnergy.addAndGet(-consumed);
                             producer.consumeProducedEnergy(consumed);
@@ -117,22 +125,19 @@ public class EnergyNet {
                     }
                 }
 
-                for (IEnergyNode neighbor : getAdjacentNodes(current)) {
+                for (IEnergyNode neighbor : getAdjacentNodes(node)) {
                     if (!visited.containsKey(neighbor)) {
-                        // Získaj pozície oboch
-                        BlockPos currentPos = ((BlockEntity) current).getBlockPos();
+                        BlockPos currentPos = ((BlockEntity) node).getBlockPos();
                         BlockPos neighborPos = ((BlockEntity) neighbor).getBlockPos();
 
-                        // Zisti smer od neighbor -> current (odkiaľ by energia prichádzala do neighbor)
                         Direction directionToNeighbor = Direction.getNearest(
                                 currentPos.getX() - neighborPos.getX(),
                                 currentPos.getY() - neighborPos.getY(),
                                 currentPos.getZ() - neighborPos.getZ(),
                                 Direction.UP);
 
-                        // Ak je neighbor consumer, over či môže prijímať z tohto smeru
                         if (neighbor instanceof IEnergyConsumer consumer) {
-                            if (!consumer.canAcceptEnergyFrom(directionToNeighbor)) continue; // preskoč ak nemôže prijímať
+                            if (!consumer.canAcceptEnergyFrom(directionToNeighbor)) continue;
                         }
 
                         visited.put(neighbor, distance + 1);
@@ -152,23 +157,6 @@ public class EnergyNet {
         }
     }
 
-    private Direction getDirectionFromTo(BlockEntity from, BlockEntity to) {
-        BlockPos posFrom = from.getBlockPos();
-        BlockPos posTo = to.getBlockPos();
-        int dx = posTo.getX() - posFrom.getX();
-        int dy = posTo.getY() - posFrom.getY();
-        int dz = posTo.getZ() - posFrom.getZ();
-
-        for (Direction dir : Direction.values()) {
-            if (dir.getStepX() == Integer.signum(dx) &&
-                    dir.getStepY() == Integer.signum(dy) &&
-                    dir.getStepZ() == Integer.signum(dz)) {
-                return dir;
-            }
-        }
-        // fallback
-        return Direction.NORTH;
-    }
 
     private synchronized void recalculateNetwork() {
         System.out.println("[EnergyNet] Recalculating network connectivity...");
@@ -231,19 +219,12 @@ public class EnergyNet {
         return result;
     }
 
-    private boolean checkCablesForVoltage(Set<IEnergyNode> reachable, int voltage) {
-        for (IEnergyNode node : reachable) {
-            if (node instanceof IEnergyCable cable && voltage > cable.getVoltageRating()) {
-                System.out.println("[EnergyNet] Overvoltage on cable at " + ((BlockEntity) cable).getBlockPos());
-                cable.explode();
-                return false;
-            } else if (node instanceof IEnergyConsumer consumer && voltage > consumer.getVoltage()) {
-                System.out.println("[EnergyNet] Overvoltage on consumer at " + ((BlockEntity) consumer).getBlockPos());
-                consumer.explode();
-                return false;
-            }
-        }
-        return true;
+    public boolean isHighlighted() {
+        return isHighlighted;
+    }
+
+    public void setHighlighted(boolean highlighted) {
+        isHighlighted = highlighted;
     }
 
     public boolean isValid() { return valid; }

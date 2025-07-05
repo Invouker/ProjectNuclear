@@ -11,7 +11,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class EnergyNetManager {
 
-    //private static final Set<EnergyNet> allNets = Collections.synchronizedSet(new HashSet<>());
     private static final CopyOnWriteArrayList<EnergyNet> allNets = new CopyOnWriteArrayList<>();
 
     private static final Queue<IEnergyNode> rebuildQueue = new LinkedList<>();

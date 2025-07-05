@@ -4,7 +4,7 @@ import net.neoforged.neoforge.energy.EnergyStorage;
 
 public interface IEnergyProducer extends IEnergyNode {
     int produceEnergy();
-    int getVoltage();
+    EEnergyTier getEnergyTier();
     EnergyStorage getEnergyStorage();
     void consumeProducedEnergy(int amount);
 }
