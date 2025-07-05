@@ -17,6 +17,7 @@ public class EnergyNet {
     private final List<IEnergyCable> cables = new ArrayList<>();
     private boolean valid = true;
     private boolean isDirty = false;
+    private boolean isHighlighted = false;
 
     public EnergyNet(ServerLevel level) {
         this.level = level;

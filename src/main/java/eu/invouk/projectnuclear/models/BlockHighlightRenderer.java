@@ -3,9 +3,7 @@ package eu.invouk.projectnuclear.models;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import eu.invouk.projectnuclear.Projectnuclear;
-import eu.invouk.projectnuclear.energynet.IEnergyCable;
-import eu.invouk.projectnuclear.energynet.IEnergyProducer;
-import eu.invouk.projectnuclear.items.DebuggerItem;
+import eu.invouk.projectnuclear.energynet.*;
 import eu.invouk.projectnuclear.tile.BasicBatteryBufferTile;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -14,7 +12,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
@@ -31,66 +28,53 @@ import java.util.*;
 @EventBusSubscriber(modid = Projectnuclear.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
 public class BlockHighlightRenderer {
 
-    private static final Set<BlockPos> HIGHLIGHTED_BLOCKS = Collections.synchronizedSet(new HashSet<>());
-
-    public static void addBlockToHighlight(BlockPos pos) {
-        HIGHLIGHTED_BLOCKS.add(pos.immutable());
-    }
-
-    public static void removeBlockToHighlight(BlockPos pos) {
-        HIGHLIGHTED_BLOCKS.remove(pos);
-    }
-
-    public static Set<BlockPos> getHighlightedBlocks() {
-        return HIGHLIGHTED_BLOCKS;
-    }
-
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
-
-
-        //if(event.getLevel().isClientSide()) return;
+        if(!event.getLevel().isClientSide()) return;
 
         PoseStack poseStack = event.getPoseStack();
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         Camera camera = event.getCamera();
-        Minecraft minecraft = Minecraft.getInstance();
 
-        if(minecraft.player != null && !(minecraft.player.getMainHandItem().getItem() instanceof DebuggerItem)) return;
-        if(HIGHLIGHTED_BLOCKS == null || getHighlightedBlocks().isEmpty()) return;
+        //Minecraft minecraft = Minecraft.getInstance();
+        //if(minecraft.player != null && !(minecraft.player.getMainHandItem().getItem() instanceof DebuggerItem)) return;
 
+        for (EnergyNet energyNets : EnergyNetManager.getCopyOfEnergyNets()) {
+            if(!energyNets.isHighlighted()) continue;
 
-       synchronized (getHighlightedBlocks()) {
-           for (BlockPos blockPos : getHighlightedBlocks()) {
-               Level level = event.getLevel();
-               BlockEntity blockEntity = level.getBlockEntity(blockPos) ;
-               if(blockEntity == null) continue;
-               List<String> Text3D = getNodeInfo(blockPos, blockEntity);
+            for (IEnergyNode node : energyNets.getAllNodes()) {
+                BlockEntity blockEntity = (BlockEntity) node;
+                BlockPos blockPos = blockEntity.getBlockPos();
+                List<String> Text3D = getNodeInfo(blockPos, blockEntity);
 
-               render3DText(Text3D, blockPos, poseStack, bufferSource, camera);
-               renderBlockHighlight(poseStack, bufferSource, blockPos, 1f, 1f, 1f, 0.5f);
-           }
-       }
+                render3DText(Text3D, blockPos, poseStack, bufferSource, camera);
+                renderBlockHighlight(poseStack, bufferSource, blockPos, 1f, 1f, 1f, 0.5f);
+            }
+        }
     }
 
     private static @NotNull List<String> getNodeInfo(BlockPos blockPos, BlockEntity blockEntity) {
         String simpleName = blockEntity.getClass().getSimpleName();
 
-        List<String> Text3D = new ArrayList<>(List.of("§e" + simpleName, blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ(), "", "§aEnergyNode"));
-        if(blockEntity instanceof IEnergyCable cable) {
+        List<String> Text3D = new ArrayList<>(List.of("§e" + simpleName, blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ()));
+       /* if(blockEntity instanceof IEnergyCable cable) {
             Text3D.add("Capacity: " + cable.getCapacity());
             Text3D.add("Voltage: " + cable.getVoltageRating());
-        }
-        else if(blockEntity instanceof IEnergyProducer producer) {
-            Text3D.add("P: Capacity: " + producer.getEnergyStorage().getEnergyStored() + "/" + producer.getEnergyStorage().getMaxEnergyStored());
-            Text3D.add("Voltage: " + producer.getVoltage());
+        }*/
+        if(blockEntity instanceof IEnergyProducer producer) {
+            Text3D.add("§aEnergyNode");
+            Text3D.add("");
+            Text3D.add("Energy: " + producer.getEnergyStorage().getEnergyStored() + "/" + producer.getEnergyStorage().getMaxEnergyStored());
+            Text3D.add("Voltage: " + producer.getEnergyTier().toString());
         }
         else if(blockEntity instanceof BasicBatteryBufferTile consumer) {
-            Text3D.add("C: Capacity: " + consumer.getEnergyStorage().getEnergyStored() + "/" + consumer.getEnergyStorage().getMaxEnergyStored());
-            Text3D.add("Voltage: " + consumer.getVoltage());
-            Text3D.add("Alive: " + consumer.isAlive());
-            Text3D.add("Priority: " + consumer.getPriority());
+            Text3D.add("§aEnergyNode");
+            Text3D.add("");
+            Text3D.add("Energy: " + consumer.getEnergyStorage().getEnergyStored() + "/" + consumer.getEnergyStorage().getMaxEnergyStored());
+            Text3D.add("Voltage: " + consumer.getEnergyTier());
+            //Text3D.add("Alive: " + consumer.isAlive());
+            //Text3D.add("Priority: " + consumer.getPriority());
         }
         return Text3D;
     }
@@ -175,41 +159,5 @@ public class BlockHighlightRenderer {
                     .setNormal(0, 1, 0);
         }
     }
-
-
-
-
-
-       /*
-    @SubscribeEvent
-    public static void onRenderLevelStage(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
-            return;
-        }
-
-        PoseStack poseStack = event.getPoseStack();
-        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        poseStack.pushPose();
-        render3DText(poseStack, bufferSource, event.getCamera());
-/*
-        double camX = event.getCamera().getPosition().x;
-        double camY = event.getCamera().getPosition().y;
-        double camZ = event.getCamera().getPosition().z;
-
-        poseStack.pushPose();
-        poseStack.translate(-camX, -camY, -camZ);
-
-        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-
-        for (BlockPos pos : HIGHLIGHTED_BLOCKS) {
-            renderBlockHighlight(poseStack, bufferSource, pos, 1f, 0f, 0f, 0.5f);
-            renderBlockText(poseStack, pos, bufferSource, event.getCamera());
-        }
-
-        poseStack.popPose();
-
-        // END BATCH len tu, raz
-        bufferSource.endBatch();
-    }*/
 
 }

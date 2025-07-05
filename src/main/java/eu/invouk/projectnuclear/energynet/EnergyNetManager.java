@@ -22,6 +22,10 @@ public class EnergyNetManager {
         rebuildEnergyNetFrom(node);
     }
 
+    public static Set<EnergyNet> getCopyOfEnergyNets() {
+        return new HashSet<>(allNets);
+    }
+
     public static void unregister(IEnergyNode node) {
         EnergyNet net = node.getEnergyNet();
         if (net != null) {
