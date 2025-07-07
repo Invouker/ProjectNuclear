@@ -4,6 +4,7 @@ import eu.invouk.projectnuclear.Projectnuclear;
 import eu.invouk.projectnuclear.tile.BasicBatteryBufferTile;
 import eu.invouk.projectnuclear.tile.BasicCableTile;
 import eu.invouk.projectnuclear.tile.CoalGeneratorTile;
+import eu.invouk.projectnuclear.tile.TransformerBlockTile;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -32,6 +33,12 @@ public class ModBlocksEntities {
                     () -> new BlockEntityType<>(BasicBatteryBufferTile::new,
                             false,
                     ModBlocks.BASIC_BATTERY_BUFFER.get()));
+
+    public static final Supplier<BlockEntityType<TransformerBlockTile>> TRANSFORMER_BLOCK_TILE =
+            BLOCK_ENTITIES.register("transformer_block_tile",
+                    () -> new BlockEntityType<>(TransformerBlockTile::new,
+                            false,
+                    ModBlocks.TRANSFORMER_BLOCK.get()));
 
 
 

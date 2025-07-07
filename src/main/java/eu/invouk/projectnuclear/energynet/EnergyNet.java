@@ -54,12 +54,14 @@ public class EnergyNet {
     public synchronized void tick() {
         if (!valid) return;
 
+        // Reset energy transferred in cables
         for (IEnergyNode node : nodes) {
             if (node instanceof IEnergyCable cable) {
                 cable.resetEnergyTransferredThisTick();
             }
         }
 
+        // Process producers
         for (IEnergyProducer producer : producers) {
             int producedEnergy = producer.produceEnergy();
             if (producedEnergy > 0) {
@@ -86,31 +88,27 @@ public class EnergyNet {
                             packetsInTransit.add(packet);
                         }
                     }
-                    producer.consumeProducedEnergy(producedEnergy);  // odpočítaj celú vyrobenú energiu
+                    producer.consumeProducedEnergy(producedEnergy);
                 }
             }
         }
 
-
-        // 2️⃣ Spracuj všetky packety v tranzite
+        // Process packets in transit
         Iterator<EnergyPacket> iterator = packetsInTransit.iterator();
         while (iterator.hasNext()) {
             EnergyPacket packet = iterator.next();
 
-            // Ak je packet na konci cesty alebo sa mu nepodarilo nájsť cestu, zahoď
             if (packet.path.isEmpty()) {
                 iterator.remove();
                 continue;
             }
 
-            // Posuň packet o jeden krok
             BlockPos nextPos = packet.path.poll();
             packet.currentPos = nextPos;
 
             BlockEntity be = level.getBlockEntity(nextPos);
 
             if (be instanceof IEnergyCable cable) {
-                // Overíme kapacitu kábla
                 int cableLimit = cable.getTier().getMaxTransferPerTick();
                 if (packet.voltage > cableLimit) {
                     cable.explode();
@@ -118,9 +116,7 @@ public class EnergyNet {
                     continue;
                 }
                 cable.addEnergyTransferredThisTick(Math.min(packet.energy, packet.voltage));
-            }
-            else if (be instanceof IEnergyConsumer consumer) {
-                // Overíme kapacitu spotrebiča
+            } else if (be instanceof IEnergyConsumer consumer) {
                 int consumerLimit = consumer.getEnergyTier().getMaxTransferPerTick();
                 if (packet.voltage > consumerLimit) {
                     consumer.explode();
@@ -133,61 +129,62 @@ public class EnergyNet {
                     iterator.remove();
                 }
             }
-            else if (be instanceof IEnergyTransformer transformer) {
-                // Transformátor akumuluje packet
-                transformer.receivePacket(packet);
-                iterator.remove();
-            }
         }
     }
 
     /**
-     * Nájde cestu ku consumerom cez BFS.
+     * Find paths to all consumers using BFS.
      */
-    private List<Pair<IEnergyConsumer, Queue<BlockPos>>> findPathsToAllConsumers(BlockPos startPos) {
+    public List<Pair<IEnergyConsumer, Queue<BlockPos>>> findPathsToAllConsumers(BlockPos startPos) {
         List<Pair<IEnergyConsumer, Queue<BlockPos>>> result = new ArrayList<>();
         Set<BlockPos> visited = new HashSet<>();
         Queue<Pair<BlockPos, Queue<BlockPos>>> queue = new LinkedList<>();
         queue.add(Pair.of(startPos, new LinkedList<>()));
+
+        //System.out.println("[EnergyNet] Starting BFS from: " + startPos);
 
         while (!queue.isEmpty()) {
             Pair<BlockPos, Queue<BlockPos>> current = queue.poll();
             BlockPos currentPos = current.getFirst();
             Queue<BlockPos> pathSoFar = current.getSecond();
 
-            if (!visited.add(currentPos)) continue;
+            if (!visited.add(currentPos)) {
+                System.out.println("[EnergyNet] Already visited: " + currentPos);
+                continue;
+            }
 
             BlockEntity be = level.getBlockEntity(currentPos);
+            //System.out.println("[EnergyNet] Visiting: " + currentPos + " BlockEntity: " + (be != null ? be.getClass().getSimpleName() : "null"));
 
-            if (be instanceof IEnergyConsumer consumer) {
+            if (be instanceof IEnergyConsumer || be instanceof IEnergyTransformer ) {
+                IEnergyConsumer consumer = (IEnergyConsumer) be;
                 Queue<BlockPos> path = new LinkedList<>(pathSoFar);
-                path.add(currentPos);    // pridajme aj poslednú pozíciu
+                path.add(currentPos);
+                System.out.println("[EnergyNet] Found consumer/transformer at: " + currentPos + " Path length: " + path.size());
                 result.add(Pair.of(consumer, path));
-                continue;  // ak sme consumer, nerekurzuj ďalej
+                // continue searching for other consumers
+                continue;
             }
 
-            if (be instanceof IEnergyCable || be instanceof IEnergyTransformer || be instanceof IEnergyProducer) {
+            if (be instanceof IEnergyCable || be instanceof IEnergyProducer) {
                 for (Direction dir : Direction.values()) {
                     BlockPos adj = currentPos.relative(dir);
-                    if (visited.contains(adj)) continue;
-
+                    if (visited.contains(adj)) {
+                        System.out.println("[EnergyNet] Adjacent already visited: " + adj);
+                        continue;
+                    }
+                    //System.out.println("[EnergyNet] Adding adjacent: " + adj + " to queue");
                     Queue<BlockPos> newPath = new LinkedList<>(pathSoFar);
-                    newPath.add(currentPos);  // pridaj aktuálny krok do novej cesty
+                    newPath.add(currentPos);
                     queue.add(Pair.of(adj, newPath));
                 }
+            } else {
+                //System.out.println("[EnergyNet] BlockEntity at " + currentPos + " is not cable/transformer/producer, skipping neighbors.");
             }
         }
-        return result;
-    }
 
-    private Queue<BlockPos> reconstructPath(BlockPos start, BlockPos end, Map<BlockPos, BlockPos> prev) {
-        LinkedList<BlockPos> path = new LinkedList<>();
-        BlockPos current = end;
-        while (!current.equals(start)) {
-            path.addFirst(current);
-            current = prev.get(current);
-        }
-        return path;
+        System.out.println("[EnergyNet] BFS complete. Found " + result.size() + " consumers.");
+        return result;
     }
 
 
@@ -198,4 +195,13 @@ public class EnergyNet {
     public Set<IEnergyNode> getNodes() {
         return nodes;
     }
+
+    public synchronized void addPacket(EnergyPacket packet) {
+        packetsInTransit.add(packet);
+    }
+
+    public Queue<EnergyPacket> getPacketsInTransit() {
+        return packetsInTransit;
+    }
+
 }

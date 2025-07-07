@@ -23,6 +23,7 @@ public class ModCreativeTab {
                 output.accept(ModBlocks.BASIC_CABLE);
                 output.accept(ModBlocks.COAL_GENERATOR);
                 output.accept(ModBlocks.BASIC_BATTERY_BUFFER);
+                output.accept(ModBlocks.TRANSFORMER_BLOCK);
             }).build());
 
     public static void register(IEventBus modBus) {

@@ -1,0 +1,11 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "minecraft:item/template_skull",
+    "model": {
+      "type": "projectnuclear:generic_overlay",
+      "front_side_texture": "transformer_input_side",
+      "texture": "projectnuclear:block/machine_casing"
+    }
+  }
+}

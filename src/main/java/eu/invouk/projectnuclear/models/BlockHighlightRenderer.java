@@ -43,13 +43,15 @@ public class BlockHighlightRenderer {
         for (EnergyNet energyNets : EnergyNetManager.getCopyOfEnergyNets()) {
             if(energyNets.isHighlighted()) continue;
 
-            for (IEnergyNode node : energyNets.getNodes()) {
-                BlockEntity blockEntity = (BlockEntity) node;
-                BlockPos blockPos = blockEntity.getBlockPos();
-                List<String> Text3D = getNodeInfo(blockPos, blockEntity);
+            synchronized (energyNets) {
+                for (IEnergyNode node : energyNets.getNodes()) {
+                    BlockEntity blockEntity = (BlockEntity) node;
+                    BlockPos blockPos = blockEntity.getBlockPos();
+                    List<String> Text3D = getNodeInfo(blockPos, blockEntity);
 
-                render3DText(Text3D, blockPos, poseStack, bufferSource, camera);
-                renderBlockHighlight(poseStack, bufferSource, blockPos, 1f, 1f, 1f, 0.5f);
+                    render3DText(Text3D, blockPos, poseStack, bufferSource, camera);
+                    renderBlockHighlight(poseStack, bufferSource, blockPos, 1f, 1f, 1f, 0.5f);
+                }
             }
         }
     }
@@ -73,8 +75,12 @@ public class BlockHighlightRenderer {
             Text3D.add("");
             Text3D.add("Energy: " + consumer.getEnergyStorage().getEnergyStored() + "/" + consumer.getEnergyStorage().getMaxEnergyStored());
             Text3D.add("Voltage: " + consumer.getEnergyTier());
-            //Text3D.add("Alive: " + consumer.isAlive());
-            //Text3D.add("Priority: " + consumer.getPriority());
+        }
+        else if(blockEntity instanceof IEnergyTransformer transformer) {
+            EEnergyTier inputTier = transformer.getInputTier();
+            EEnergyTier outputTier = EEnergyTier.getTierUp(inputTier);
+            Text3D.add("Input: " + inputTier.name() + " @ V: " + inputTier.getMaxTransferPerTick());
+            Text3D.add("Output: " + outputTier.name() + " @ V: " + outputTier.getMaxTransferPerTick());
         }
         return Text3D;
     }

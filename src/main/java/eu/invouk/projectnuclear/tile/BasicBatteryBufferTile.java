@@ -1,7 +1,7 @@
 package eu.invouk.projectnuclear.tile;
 
 import eu.invouk.projectnuclear.Projectnuclear;
-import eu.invouk.projectnuclear.blocks.CoalGenerator;
+import eu.invouk.projectnuclear.blocks.energy.CoalGenerator;
 import eu.invouk.projectnuclear.energynet.*;
 import eu.invouk.projectnuclear.models.IOverlayRenderable;
 import eu.invouk.projectnuclear.models.MachineRenderer;
@@ -23,9 +23,8 @@ import org.jetbrains.annotations.Nullable;
 public class BasicBatteryBufferTile extends BlockEntity implements IOverlayRenderable, IEnergyConsumer, IEnergyProducer {
 
     private EnergyNet net;
-    private final EEnergyTier eEnergyTier = EEnergyTier.ULV;
+    private final EEnergyTier eEnergyTier = EEnergyTier.IV;
     private final MachineRenderer machineRenderer;
-
 
     private static final ResourceLocation TEXTURE_MACHINE_BLOCK           = ResourceLocation.fromNamespaceAndPath(Projectnuclear.MODID, "block/machine_casing");
     private static final ResourceLocation TEXTURE_OUTPUT_SIDE  = ResourceLocation.fromNamespaceAndPath(Projectnuclear.MODID, "block/battery_output_side");
@@ -111,19 +110,19 @@ public class BasicBatteryBufferTile extends BlockEntity implements IOverlayRende
 
         // Ak tam je IEnergyConsumer alebo IBufferEnergyConsumer alebo kábel
         if (!(be instanceof IEnergyConsumer) &&
-                !(be instanceof IEnergyCable)) {
+                !(be instanceof IEnergyCable) &&
+                !(be instanceof IEnergyTransformer)) {
             return 0; // na výstupe nie je konzument ani kábel
         }
 
         // Vypočítaj koľko môže batéria maximálne poslať na tick
-        return Math.min(energyStorage.getEnergyStored(), 50);
+        return Math.min(energyStorage.getEnergyStored(), eEnergyTier.getMaxTransferPerTick());
     }
 
     @Override
     public EEnergyTier getEnergyTier() {
         return eEnergyTier;
     }
-
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {

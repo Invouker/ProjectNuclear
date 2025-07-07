@@ -1,0 +1,14 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "eu.invouk.projectnuclear",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "projectnuclear.refmap.json",
+  "mixins": [
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

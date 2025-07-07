@@ -1,0 +1,20 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "projectnuclear:block/cable",
+    "cable": "projectnuclear:block/cable"
+  },
+  "elements": [
+    {   "from": [ 6, 6, 0 ],
+      "to": [ 10, 10, 6 ],
+      "faces": {
+        "down":  { "texture": "#cable", "cullface": "down" },
+        "up":    { "texture": "#cable", "cullface": "up" },
+        "north": { "texture": "#cable", "cullface": "north" },
+        "south": { "texture": "#cable", "cullface": "south" },
+        "west":  { "texture": "#cable", "cullface": "west" },
+        "east":  { "texture": "#cable", "cullface": "east" }
+      }
+    }
+  ]
+}

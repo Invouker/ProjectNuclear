@@ -1,7 +1,7 @@
 package eu.invouk.projectnuclear.tile;
 
 import eu.invouk.projectnuclear.Projectnuclear;
-import eu.invouk.projectnuclear.blocks.CoalGenerator;
+import eu.invouk.projectnuclear.blocks.energy.CoalGenerator;
 import eu.invouk.projectnuclear.energynet.EEnergyTier;
 import eu.invouk.projectnuclear.energynet.EnergyNet;
 import eu.invouk.projectnuclear.energynet.EnergyNetManager;

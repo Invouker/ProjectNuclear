@@ -74,8 +74,10 @@ public class DebuggerItem extends Item {
                     player.displayClientMessage(Component.literal("-P- Stored energy: " + producer.getEnergyStorage().getEnergyStored()), false);
                     player.displayClientMessage(Component.literal("-P- Max energy stored: " + producer.getEnergyStorage().getMaxEnergyStored()), false);
                 } else if (node instanceof IEnergyConsumer consumer){
-                    player.displayClientMessage(Component.literal("-C- Stored energy: " + consumer.getEnergyStorage().getEnergyStored()), false);
-                    player.displayClientMessage(Component.literal("-C- Max energy stored: " + consumer.getEnergyStorage().getMaxEnergyStored()), false);
+                    if(consumer.getEnergyStorage() != null) {
+                        player.displayClientMessage(Component.literal("-C- Stored energy: " + consumer.getEnergyStorage().getEnergyStored()), false);
+                        player.displayClientMessage(Component.literal("-C- Max energy stored: " + consumer.getEnergyStorage().getMaxEnergyStored()), false);
+                    }
                     player.displayClientMessage(Component.literal("-C- Priority: " + consumer.getPriority()), false);
                     player.displayClientMessage(Component.literal("-C- Voltage: " + consumer.getEnergyTier()), false);
                     player.displayClientMessage(Component.literal("-C- IsAlive: " + consumer.isAlive()), false);

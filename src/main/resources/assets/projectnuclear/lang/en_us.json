@@ -2,5 +2,7 @@
 	"creativetab.projectnuclear.tab": "Project Nuclear",
 	"block.projectnuclear.coal_generator":"Coal Generator",
 	"container.project_nuclear.coal_generator": "Coal Generator",
-	"item.projectnuclear.debugger": "Energy Debugger"
+	"item.projectnuclear.debugger": "Energy Debugger",
+	"block.projectnuclear.transformer_block": "Transformer Block",
+	"block.projectnuclear.basic_battery_buffer": "Basic Battery Buffer"
 }

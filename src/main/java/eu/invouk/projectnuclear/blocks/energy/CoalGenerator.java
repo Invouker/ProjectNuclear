@@ -1,4 +1,4 @@
-package eu.invouk.projectnuclear.blocks;
+package eu.invouk.projectnuclear.blocks.energy;
 
 import com.mojang.serialization.MapCodec;
 import eu.invouk.projectnuclear.energynet.EnergyNetManager;

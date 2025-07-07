@@ -50,6 +50,7 @@ public class Projectnuclear {
         public static void onClientSetup(FMLClientSetupEvent event) {
             BlockEntityRenderers.register(ModBlocksEntities.COAL_GENERATOR_TILE.get(), GenericOverlayRenderer::new);
             BlockEntityRenderers.register(ModBlocksEntities.BASIC_BATTERY_BUFFER.get(), GenericOverlayRenderer::new);
+            BlockEntityRenderers.register(ModBlocksEntities.TRANSFORMER_BLOCK_TILE.get(), GenericOverlayRenderer::new);
         }
 
         @SubscribeEvent
@@ -67,6 +68,10 @@ public class Projectnuclear {
 
             event.register(
                     ModBlocks.BASIC_BATTERY_BUFFER.get(),
+                    new GenericOverlayItemRenderer.Unbaked(ResourceLocation.fromNamespaceAndPath(MODID, "block/machine_casing"))
+            );
+            event.register(
+                    ModBlocks.TRANSFORMER_BLOCK.get(),
                     new GenericOverlayItemRenderer.Unbaked(ResourceLocation.fromNamespaceAndPath(MODID, "block/machine_casing"))
             );
         }
